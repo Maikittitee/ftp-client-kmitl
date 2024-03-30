@@ -5,7 +5,7 @@ def ft_open(clientSocket, args):
 	response = clientSocket.recv(1024).decode()
 	print("Connected to test.rebex.net.")
 	print(response)
-	username = input("Name: ")
+	username = input("Name: ").strip()
 	clientSocket.send(("USER " + username + "\r\n").encode())
 	response = clientSocket.recv(1024).decode()
 	password = input(response)
