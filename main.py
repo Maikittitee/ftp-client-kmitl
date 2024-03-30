@@ -2,7 +2,7 @@ import socket
 
 def	main():
 	while (True):
-		args = input("ftp> ").strip().split()
+		args = input("miniftp> ").strip().split()
 		cmd = args[0]
 		args = args[1:]
 
@@ -25,6 +25,8 @@ def	main():
 			print(response)
 		
 		if (cmd == "disconnect"):
+			clientSocket.send("QUIT\r\n".encode())
+			print(clientSocket.recv(1024).decode())
 			clientSocket.close()
 			
 main()
