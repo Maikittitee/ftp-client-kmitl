@@ -6,7 +6,7 @@ def ft_open(clientSocket, args):
 	host = args[0]
 	port = int(args[1]) if len(args) > 1 else 21
 	clientSocket.connect((host, port))
-	clientSocket.settimeout(1)
+	# clientSocket.settimeout(1)
 	response = clientSocket.recv(1024).decode()
 	print(f"Connected to {host}.")
 	print(response)
@@ -56,10 +56,9 @@ def ft_ls(clientSocket, file=''):
 		print(dir_response, end='')
 		if dir_response.startswith('5'):
 			return
-		while True:
+		data = True
+		while data:
 			data = data_socket.recv(4096)
-			if not data:
-				break
 			print(data.decode(), end='')
 		control_response = clientSocket.recv(1024).decode()
 		print(control_response, end='')
