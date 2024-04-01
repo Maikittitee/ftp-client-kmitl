@@ -7,6 +7,7 @@ def ft_open(clientSocket, args):
 	response = clientSocket.recv(1024).decode()
 	print(f"Connected to {args[0]}.")
 	print(response)
+	print("200 Enabled UTF-8 encoding.")
 	username = input("Name: ").strip()
 	clientSocket.send(("USER " + username + "\r\n").encode())
 	response = clientSocket.recv(1024).decode()
@@ -38,7 +39,7 @@ def ft_ls(clientSocket, file=''):
 	number = random.randint(0,65535)
 	ipaddr = socket.gethostbyname(socket.gethostname())+f".{number//256}.{number%256}"
 	ipaddr = ipaddr.replace('.',',')
-	print(ipaddr)	
+	# print(ipaddr)	
 	clientSocket.send(f'PORT {ipaddr}\r\n'.encode())
 	resp = clientSocket.recv(1024).decode()
 	print(resp,end='')
@@ -76,6 +77,58 @@ def ft_user(client_socket):
 	password = input("Password: ")
 	client_socket.send(f"PASS {password}\r\n".encode())
 
+def ft_get(client_socket, args):
+	filename = args[0]
+	number = random.randint(0,65535)
+	ipaddr = socket.gethostbyname(socket.gethostname())+f".{number//256}.{number%256}"
+	ipaddr = ipaddr.replace('.',',')
+	client_socket.send(f'PORT {ipaddr}\r\n'.encode())
+	print(client_socket.recv(1024).decode())
+	
+	client_socket.sendall(b'PASV\r\n')
+	pasv_response = client_socket.recv(1024).decode()
+	data_host, data_port = parse_pasv_response(pasv_response)
+
+	client_socket.send(f"RETR {filename}\r\n".encode())
+	print(client_socket.recv(1024).decode())
+
+	data_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	data_socket.settimeout(10)
+	data_socket.connect((data_host, data_port))
+	with open(filename, 'wb') as lf:
+		while True:
+			try:
+				data = data_socket.recv(1024)
+				if not data:
+					break
+				lf.write(data)
+			except socket.timeout:
+				print("Data connection timed out.")
+				break
+			except Exception as e:
+				print("An error occurred:", e)
+				break
+	data_socket.close()
+	resp = client_socket.recv(1024).decode()
+	print(resp)
+
+def ft_delete(client_socket, args):
+	file = input('Remote file ') if len(args) == 0 else args[0]
+	client_socket.send(f'DELE {file}\r\n'.encode())
+	resp = client_socket.recv(1024)
+	print(resp.decode())
+
+def ft_rename(client_socket, args):
+	from_name = input('(from name) ') if len(args) <= 0 else args[0]
+	to_name = input('(to name) ') if len(args) <= 1 else args[1]
+	client_socket.send(f'RNFR {from_name}\r\n'.encode())
+	print(client_socket.recv(1024).decode())
+	client_socket.send(f'RNTO {to_name}\r\n'.encode())
+	print(client_socket.recv(1024).decode())
+
+def ft_put(client_socket, args):
+	pass
+
 
 def	main():
 	clientSocket = None
@@ -88,7 +141,7 @@ def	main():
 		if (cmd == "open"):
 			clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			ft_open(clientSocket, args)
-		if (cmd == "disconnect" or cmd == "bye"):
+		if (cmd == "disconnect"):
 			ft_close(clientSocket)
 		if (cmd == "ascii"):
 			ft_ascii(clientSocket)
@@ -100,5 +153,17 @@ def	main():
 			ft_pwd(clientSocket)
 		if (cmd == "ls"):
 			ft_ls(clientSocket)
-			
-main()
+		if (cmd == "get"):
+			ft_get(clientSocket, args)
+		if (cmd == "delete"):
+			ft_delete(clientSocket, args)
+		# if (cmd == "put"):
+		# 	ft_put(clientSocket, args)
+		else:
+			print("Command not found")
+			continue
+
+try:			
+	main()
+except:
+	print("please be careful with my vulnerable code :(")
