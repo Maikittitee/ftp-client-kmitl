@@ -172,10 +172,10 @@ def ft_put(client_socket, args):
 def	main():
 	clientSocket = None
 	while (True):
-		args = input("miniftp> ").strip().split()
+		args = input("ftp> ").strip().split()
 		cmd = args[0]
 		args = args[1:]
-		print(f"cmd is {cmd}")
+		# print(f"cmd is {cmd}")
 		if (cmd == "quit" or cmd == "bye"):
 			break 
 		elif (cmd == "open"):
