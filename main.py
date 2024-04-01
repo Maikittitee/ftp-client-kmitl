@@ -3,7 +3,7 @@ import socket
 def ft_open(clientSocket, args):
 	clientSocket.connect((args[0], int(args[1])))
 	response = clientSocket.recv(1024).decode()
-	print("Connected to test.rebex.net.")
+	print(f"Connected to {args[0]}.")
 	print(response)
 	username = input("Name: ").strip()
 	clientSocket.send(("USER " + username + "\r\n").encode())
