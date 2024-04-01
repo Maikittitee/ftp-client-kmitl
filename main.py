@@ -3,12 +3,16 @@ import random
 
 
 def ft_open(clientSocket, args):
-	clientSocket.connect((args[0], int(args[1])))
+	host = args[0]
+	port = int(args[1]) if len(args) > 1 else 21
+	clientSocket.connect((host, port))
+	clientSocket.settimeout(1)
 	response = clientSocket.recv(1024).decode()
-	print(f"Connected to {args[0]}.")
+	print(f"Connected to {host}.")
 	print(response)
-	print("200 Enabled UTF-8 encoding.")
-	username = input("Name: ").strip()
+	clientSocket.send(f'OPTS UTF8 ON\r\n'.encode())
+	print(clientSocket.recv(1024).decode())
+	username = input(f'User ({host}:(none)): ')
 	clientSocket.send(("USER " + username + "\r\n").encode())
 	response = clientSocket.recv(1024).decode()
 	password = input(response)
@@ -39,7 +43,7 @@ def ft_ls(clientSocket, file=''):
 	number = random.randint(0,65535)
 	ipaddr = socket.gethostbyname(socket.gethostname())+f".{number//256}.{number%256}"
 	ipaddr = ipaddr.replace('.',',')
-	# print(ipaddr)	
+	
 	clientSocket.send(f'PORT {ipaddr}\r\n'.encode())
 	resp = clientSocket.recv(1024).decode()
 	print(resp,end='')
@@ -127,7 +131,43 @@ def ft_rename(client_socket, args):
 	print(client_socket.recv(1024).decode())
 
 def ft_put(client_socket, args):
-	pass
+	if (len(args) < 1):
+		file = input("Local file ")
+		new = input("Remote file ")
+	elif (len(args) < 2):
+		file = args[0]
+		new = file
+
+	number = random.randint(0,65535)
+	ipaddr = socket.gethostbyname(socket.gethostname())+f".{number//256}.{number%256}"
+	ipaddr = ipaddr.replace('.',',')
+	client_socket.send(f'PORT {ipaddr}\r\n'.encode())
+	port_status = client_socket.recv(1024)
+	print(port_status.decode(),end="")
+	with open(file,'rb') as f:
+		try:
+
+			client_socket.sendall(b'PASV\r\n')
+			response = client_socket.recv(1024).decode()
+			port_start = response.find('(') + 1
+			port_end = response.find(')')
+			port_str = response[port_start:port_end].split(',')
+			data_port = int(port_str[-2]) * 256 + int(port_str[-1])
+			data_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			data_socket.connect((socket.gethostbyname(self.name), data_port))
+			client_socket.sendall((f'STOR {new}\r\n').encode())
+			response = client_socket.recv(4096).decode()
+			print(response,end='')
+			if not response.startswith('150'):
+				return
+			data = f.read(4096)
+			while data:
+				data_socket.sendall(data)
+				data = f.read(4096)
+		finally:
+			data_socket.close()
+		response = client_socket.recv(1024)
+		print(response.decode(),end='')
 
 
 def	main():
@@ -136,34 +176,36 @@ def	main():
 		args = input("miniftp> ").strip().split()
 		cmd = args[0]
 		args = args[1:]
-		if (cmd == "quit"):
+		print(f"cmd is {cmd}")
+		if (cmd == "quit" or cmd == "bye"):
 			break 
-		if (cmd == "open"):
+		elif (cmd == "open"):
 			clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			ft_open(clientSocket, args)
-		if (cmd == "disconnect"):
+		elif (cmd == "disconnect" or cmd == "close"):
 			ft_close(clientSocket)
-		if (cmd == "ascii"):
+		elif (cmd == "ascii"):
 			ft_ascii(clientSocket)
-		if (cmd == "binary"):
+		elif (cmd == "binary"):
 			ft_binary(clientSocket)
-		if (cmd == "cd"):
+		elif (cmd == "cd"):
 			ft_cd(clientSocket, args)
-		if (cmd == "pwd"):
+		elif (cmd == "pwd"):
 			ft_pwd(clientSocket)
-		if (cmd == "ls"):
-			ft_ls(clientSocket)
-		if (cmd == "get"):
+		elif (cmd == "ls"):
+			ft_ls(clientSocket, "" if len(args) == 0 else args[0])
+		elif (cmd == "get"):
 			ft_get(clientSocket, args)
-		if (cmd == "delete"):
+		elif (cmd == "delete"):
 			ft_delete(clientSocket, args)
-		# if (cmd == "put"):
-		# 	ft_put(clientSocket, args)
+		elif (cmd == "put"):
+			ft_put(clientSocket, args)
+		elif (cmd == "user"):
+			ft_user(clientSocket)
 		else:
-			print("Command not found")
-			continue
+			print("Invalid command.")
 
-try:			
-	main()
-except:
-	print("please be careful with my vulnerable code :(")
+# try:			
+main()
+# except:
+# 	print("please be careful with my vulnerable code :(")
