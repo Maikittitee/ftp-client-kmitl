@@ -204,7 +204,4 @@ def	main():
 		else:
 			print("Invalid command.")
 
-# try:			
 main()
-# except:
-# 	print("please be careful with my vulnerable code :(")
