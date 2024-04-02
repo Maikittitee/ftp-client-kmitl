@@ -1,3 +1,11 @@
-- get <filename> :  ไฟล์จะมาอยู่ใน directory ของ project นะครับ จะไม่ได้อยู่ใน / ของเครื่อง
+Welcome to test.rebex.net!
 
-บาง output อาจจะเป็น format ของ macOS นะครับ เนื่องจากพยายามหา output ของวินโดว์แล้วเจอแค่บางอัน
+You are connected to an FTP or SFTP server used for testing purposes
+by Rebex FTP/SSL or Rebex SFTP sample code. Only read access is allowed.
+
+For information about Rebex FTP/SSL, Rebex SFTP and other Rebex libraries
+for .NET, please visit our website at https://www.rebex.net/
+
+For feedback and support, contact support@rebex.net
+
+Thanks!

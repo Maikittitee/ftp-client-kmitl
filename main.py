@@ -94,7 +94,10 @@ def ft_get(client_socket, args):
 	data_host, data_port = parse_pasv_response(pasv_response)
 
 	client_socket.send(f"RETR {filename}\r\n".encode())
-	print(client_socket.recv(1024).decode())
+	res = client_socket.recv(1024).decode()
+	print(res)
+	if (res.startswith('5')):
+		return 
 
 	data_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	data_socket.settimeout(10)
@@ -169,8 +172,8 @@ def ft_put(client_socket, args):
 		response = client_socket.recv(1024)
 		print(response.decode(),end='')
 
-
 def	main():
+	is_connected = False
 	clientSocket = None
 	while (True):
 		args = input("ftp> ").strip().split()
@@ -178,12 +181,19 @@ def	main():
 		args = args[1:]
 		# print(f"cmd is {cmd}")
 		if (cmd == "quit" or cmd == "bye"):
+			if (is_connected):
+				ft_close(clientSocket)
 			break 
 		elif (cmd == "open"):
 			clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			is_connected = True
 			ft_open(clientSocket, args)
 		elif (cmd == "disconnect" or cmd == "close"):
-			ft_close(clientSocket)
+			if (is_connected):
+				ft_close(clientSocket)
+			else:
+				print("Not connected.")
+			is_connected = False
 		elif (cmd == "ascii"):
 			ft_ascii(clientSocket)
 		elif (cmd == "binary"):
