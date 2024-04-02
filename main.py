@@ -4,6 +4,8 @@ import random
 
 def ft_open(clientSocket, args):
 	host = args[0]
+	global server_name
+	server_name = host
 	port = int(args[1]) if len(args) > 1 else 21
 	clientSocket.connect((host, port))
 	# clientSocket.settimeout(1)
@@ -157,7 +159,8 @@ def ft_put(client_socket, args):
 			port_str = response[port_start:port_end].split(',')
 			data_port = int(port_str[-2]) * 256 + int(port_str[-1])
 			data_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-			data_socket.connect((socket.gethostbyname(self.name), data_port))
+			global server_name
+			data_socket.connect((server_name, data_port))
 			client_socket.sendall((f'STOR {new}\r\n').encode())
 			response = client_socket.recv(4096).decode()
 			print(response,end='')
@@ -173,6 +176,7 @@ def ft_put(client_socket, args):
 		print(response.decode(),end='')
 
 def	main():
+	server_name = None
 	is_connected = False
 	clientSocket = None
 	while (True):
@@ -193,6 +197,7 @@ def	main():
 				ft_close(clientSocket)
 			else:
 				print("Not connected.")
+			server_name = None
 			is_connected = False
 		elif (cmd == "ascii"):
 			ft_ascii(clientSocket)
