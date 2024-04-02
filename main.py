@@ -60,6 +60,7 @@ def ft_ls(clientSocket, file=''):
 		while data:
 			data = data_socket.recv(4096)
 			print(data.decode(), end='')
+		data_socket.close()
 		control_response = clientSocket.recv(1024).decode()
 		print(control_response, end='')
 
